@@ -1,0 +1,24 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+dInterval	/home/pihizi/git/webapp/js/core.js	/^    var dInterval = setInterval;$/;"	v
+events.bind	/home/pihizi/git/webapp/js/core.js	/^        ,bind: function(name, handler) {$/;"	m
+events.create	/home/pihizi/git/webapp/js/core.js	/^    events = {$/;"	m
+events.fire	/home/pihizi/git/webapp/js/core.js	/^        ,fire: function(name, obj) {$/;"	m
+events.remove	/home/pihizi/git/webapp/js/core.js	/^        ,remove: function(name) {$/;"	m
+evtState.fromType	/home/pihizi/git/webapp/js/core.js	/^            ,fromType: evt.type$/;"	p
+evtState.params	/home/pihizi/git/webapp/js/core.js	/^        var evtState = {$/;"	p
+getURL	/home/pihizi/git/webapp/js/core.js	/^    var getURL = function(name) {$/;"	f
+onmessage	/home/pihizi/git/webapp/js/abc.worker.js	/^onmessage = function(oEvt) {$/;"	f
+onmessage	/home/pihizi/git/webapp/js/webapp.worker.js	/^onmessage = function(oEvt) {$/;"	f
+path	/home/pihizi/git/webapp/js/router.js	/^    var path = window.location.pathname;$/;"	v
+window.define	/home/pihizi/git/webapp/js/core.js	/^        requirerror = [];$/;"	f
+window.lockey.get	/home/pihizi/git/webapp/js/core.js	/^    },$/;"	m
+window.lockey.reset	/home/pihizi/git/webapp/js/core.js	/^window.lockey = {$/;"	m
+window.render	/home/pihizi/git/webapp/js/core.js	/^    };$/;"	f
+window.require	/home/pihizi/git/webapp/js/core.js	/^    };$/;"	f
+window.setInterval	/home/pihizi/git/webapp/js/core.js	/^    var dInterval = setInterval;$/;"	f
+window.setTimeout	/home/pihizi/git/webapp/js/core.js	/^    var dOut = setTimeout;$/;"	f
