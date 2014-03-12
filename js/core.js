@@ -24,7 +24,7 @@ window.lockey = {
     }
 };
 
-(function(window) {
+(function($) {
 // 重写系统异步函数 && AJAX封装
     var dOut = setTimeout;
     window.setTimeout = function(callback, time) {
@@ -50,7 +50,7 @@ window.lockey = {
     };
 })(window);
 
-(function(window) {
+(function($) {
 // 自定义事件
     var events = {},
         handlers = {};
@@ -63,7 +63,7 @@ window.lockey = {
             var evt = new Event(name);
             events[name] = evt;
             handlers[name] = [];
-            window.addEventListener(name, function(evt) {
+            $.addEventListener(name, function(evt) {
                 var that = this;
                 handlers[name].forEach(function(value) {
                     value && value.call(that, evt);
@@ -74,7 +74,7 @@ window.lockey = {
             events.create(name);
             handlers[name].push(handler);
         }
-        ,remove: function(name) {
+        ,unbind: function(name) {
             if (events[name]) delete events[name];
             if (handlers[name]) delete handlers[name];
         }
@@ -86,16 +86,16 @@ window.lockey = {
                     events[name][i] = obj[i];
                 }
             }
-            window.dispatchEvent(events[name]);
+            $.dispatchEvent(events[name]);
         }
     };
-    window.bindEvent = events.bind;
-    window.fireEvent = events.fire;
+    $.bindEvent = events.bind;
+    $.fireEvent = events.fire;
 })(window);
 
-(function(window) {
+(function($) {
 // require & define & render
-    var map = window.fileMap || {};
+    var map = $.fileMap || {};
     var getURL = function(name) {
         var url = map[name] || '/webapp/js/page/'+name+'.js';
         return url;
@@ -103,7 +103,7 @@ window.lockey = {
     var required = {},
         requiring = {},
         requirerror = [];
-    window.define = function() {
+    $.define = function() {
         var name, depends, handler;
         switch (parseInt(arguments.length, 10)) {
         case 3:
@@ -134,10 +134,16 @@ window.lockey = {
         }
     };
 
-    window.require = function(modules, callback) {
-        if (!modules) return console.info('require参数错误');
+    $.require = function(modules, callback) {
+        if (!modules) {
+            console.info('require参数错误');
+            return;
+        }
         if (!(modules instanceof Array)) modules = [modules];
-        if (typeof callback !== 'function') return console.info('require参数错误');
+        if (typeof callback !== 'function') {
+            console.info('require参数错误');
+            return;
+        }
         callback.lockey = callback.lockey || window.lockey.get();
         var loadingDependent = false;
         modules.forEach(function(name, index, arr) {
@@ -152,7 +158,7 @@ window.lockey = {
                 var script = document.createElement('script');
                 script.addEventListener('load', function() {
                     if (callback.lockey!==window.lockey.get()) return;
-                    window.require(modules, callback);
+                    $.require(modules, callback);
                 });
                 script.addEventListener('error', function() {
                     requiring[name] = false;
@@ -173,37 +179,63 @@ window.lockey = {
             callback.apply(null, params);
         }
     };
-    window.render = function(job, options, callback, keepLock) {
+    $.exec = function() {
+        var cmds = arguments[0].split('.');
+        if (!cmds.length) {
+            console.warn('exec的执行命令非法');
+            return;
+        }
+        var cmd = {
+            name: cmds[0]
+            ,opt: cmds[1] || 'show'
+            ,env: cmds[2] || 'front'
+        };
         if (typeof arguments[1] === 'function') {
-            options = [];
-            callback = arguments[1]
-            keepLock = arguments[2] || false;
+            var options = [];
+            var callback = arguments[1];
+            var resetLock = arguments[2]===true;
         }
         else {
-            options = arguments[1] instanceof Array ? arguments[1] : [arguments[1]];
-            callback = arguments[2];
-            keepLock = arguments[3] || false;
+            var options = arguments[1] instanceof Array ? arguments[1] : [arguments[1]];
+            var callback = arguments[2];
+            var resetLock = arguments[3]===true;
         }
-        var worker = new Worker(getURL.apply(null, [job+'.worker', options]));
-        if (!keepLock) {
+        if (resetLock) {
             window.lockey.reset();
         }
-        worker.id = window.lockey.get();
-        worker.addEventListener('message', function(oEvt) {
-            if (worker.id===window.lockey.get()) {
-                var tmp = oEvt.data instanceof Array ? oEvt.data : [oEvt.data];
-                callback && callback.apply(worker, tmp);
-            }
-            worker.terminate();
-        });
-        worker.postMessage({
-            job: job
-            ,options: options
-        });
+
+        if (cmd.env==='worker') {
+            var worker = new Worker(getURL.apply(null, [cmd.name+'.worker', options]));
+            worker.id = window.lockey.get();
+            worker.addEventListener('message', function(oEvt) {
+                if (worker.id===window.lockey.get()) {
+                    var tmp = oEvt.data instanceof Array ? oEvt.data : [oEvt.data];
+                    $.require(cmd.name, function(rh) {
+                        console.info('执行action的回调函数，进行页面渲染');
+                        rh.apply(cmd, tmp);
+                        callback && callback();
+                    });
+                }
+                worker.terminate();
+            });
+
+            var data = {
+                options: options
+            };
+            data['cmd'] = cmd;
+            worker.postMessage(data);
+        }
+        else {
+            $.require(cmd.name, function(rh) {
+                console.info('执行回调函数, 页面局部渲染');
+                rh && rh.call(cmd);
+                callback && callback();
+            });
+        }
     };
 })(window);
 
-(function(window) {
+(function($) {
     var changeHandler = function(evt) {
         var hash = window.location.hash
             ,pattern = /\/([a-z]+)/g
@@ -241,9 +273,9 @@ window.lockey = {
             evtState.hash = window.location.hash;
         }
         matches.push(window.location.search);
-        window.fireEvent('render', evtState);
+        $.fireEvent('render', evtState);
     };
-    window.addEventListener('popstate', function(evt) {
+    $.addEventListener('popstate', function(evt) {
         console.info('一起从这里开始');
         // popstate 每每都会触发，需要考虑它与DOMContentLoaded和hashchange的顺序和互斥
         var state = evt.state || {};
@@ -253,7 +285,7 @@ window.lockey = {
         }
         else {
             console.info('历史记录的前进或者后退操作');
-            window.fireEvent('render', state);
+            $.fireEvent('render', state);
         }
     });
     /*
@@ -262,9 +294,12 @@ window.lockey = {
     document.addEventListener('DOMContentLoaded', changeHandler);
     */
 
-    window.bindEvent('render', function(evt) {
+    $.bindEvent('render', function(evt) {
         var action = evt.params[0];
-        if (!action) return console.info('render事件需要传入合法的参数');
+        if (!action) {
+            console.info('render事件需要传入合法的参数');
+            return;
+        }
         var url = '/'+evt.params.join('/');
         console.info('美化地址栏地址');
         window.history.replaceState({params: evt.params, fromType: evt.fromType, hash: evt.hash}, window.document.title, url);
@@ -281,23 +316,12 @@ window.lockey = {
         var params = evt.params;
         params.splice(0);
 
-        var myData;
-        var callback = function() {
-            window.require(action, function(callback) {
-                if (!myData) return console.info('依赖的webworker的执行结果尚未返回');
-                console.info('执行action的回调函数，进行页面渲染');
-                callback.apply(null, myData);
-                if (evt.hash) {
-                    window.fireEvent('hash', {'hash': evt.hash});
-                }
-            });
-        };
-        callback();
         console.info('通过webworker新开处理数据de线程');
-        window.render(action, params, function() {
-            myData = arguments;
-            callback();
-        });
+        $.exec(action+'.show.worker', params, function() {
+            if (evt.hash) {
+                $.fireEvent('hash', {'hash': evt.hash});
+            }
+        }, true);
     });
 
 })(window);
