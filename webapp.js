@@ -7,6 +7,6 @@ else {
 */
 define(function() {
     return function(data) {
-        document.querySelector('body').innerHTML = JSON.stringify(data);
+        document.querySelector('#x').innerHTML = JSON.stringify(data);
     };
 });
