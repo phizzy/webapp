@@ -3,6 +3,7 @@
     "use strict";
 
     $.exports = $.exports || [];
+    $.dependencies = $.dependencies || [];
 
     var step = {
         pending: {}
