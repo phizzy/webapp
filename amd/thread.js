@@ -20,7 +20,7 @@
     var workers = {};
     var ascId = 0;
     var maxThread = document.querySelector('meta[name=phizzy-maxthread]') ? parseInt(document.querySelector('meta[name=phizzy-maxthread]').content, 10) : 2;
-    var exec = function(depend) {
+    var exec = function(depend, callback) {
         var tmp, len=0;
         for (var i in workers) {
             tmp = workers[i];
@@ -33,7 +33,7 @@
         }
         if (len>=2) {
             return setTimeout(function() {
-                exec(depend);
+                exec(depend, callback);
             }, 100);
         }
         var myUC, myWC;
@@ -41,15 +41,20 @@
             if (!myUC || !myWC) return;
             myUC(myWC());
         });
-        require(depend, function(dependOBJ) {
-            if (typeof dependOBJ==='function') {
-                myUC = dependOBJ;
-            }
-            else {
-                throw new Error ('window.exec执行的require，函数返回值必须是function类型');
-            }
-            myFC();
-        });
+        if (callback && typeof callback==='function') {
+            myUC = callback;
+        }
+        else {
+            require(depend, function(dependOBJ) {
+                if (typeof dependOBJ==='function') {
+                    myUC = dependOBJ;
+                }
+                else {
+                    throw new Error ('window.exec执行的require，函数返回值必须是function类型');
+                }
+                myFC();
+            });
+        }
         var url = window.getURL(depend, 'webworker'),
             worker = new Worker(url);
         worker.id = isNaN(++ascId) ? 0 : ascId;
