@@ -1,6 +1,6 @@
-(function($) {
+(function(_) {
     var action = document.querySelector('meta[name=phizzy-action]')
-        ,suffix = document.querySelector('meta[name=phizzy-suffix]') // 'webworker:worker;page:'
+        ,suffix = document.querySelector('meta[name=phizzy-suffix]')
         ,jsRoot = document.querySelector('meta[name=phizzy-root-js]')
         ;
 
@@ -8,7 +8,9 @@
     suffix = suffix ? suffix.content : '';
     jsRoot = jsRoot ? (jsRoot.content.lastIndexOf('/')!==jsRoot.content.length-1 ? jsRoot.content+'/' : jsRoot.content) : '';
 
-    var tmpSuffix = {};
+    var tmpSuffix = {
+        webworker: 'worker'
+    };
     if (suffix) {
         suffix = suffix.split(';');
         suffix.forEach(function(str) {
@@ -20,13 +22,18 @@
     suffix = tmpSuffix;
 
     var getURL = function(name, protocol) {
+        var myI = name.lastIndexOf('.js');
+        if (myI!==-1 && myI===name.length-3) {
+            name = name.substring(0, name.length-3);
+        }
         var myAction = name;
         if (action && action.test(name)) {
-            myAction = RegExp.$1;
+            myAction = RegExp._1;
         }
         var url = jsRoot + myAction + ((suffix && suffix[protocol]) ? '.'+suffix[protocol] : '') + '.js';
+        url = url.replace(/(?:[a-z0-9_]+\/\.\.\/)|(?:\.\/)/, '');
         return url;
     };
 
-    $.getURL = getURL;
+    _.getURL = getURL;
 })(window);

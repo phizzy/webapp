@@ -1,7 +1,7 @@
-(function($) {
+(function(_) {
 
-    $.exports = $.exports || [];
-    $.dependencies = $.dependencies || [];
+    _.exports = _.exports || [];
+    _.dependencies = _.dependencies || [];
 
     var define = function() {
         /**
@@ -16,27 +16,27 @@
         var factory = window.lock(args.pop()),
             dependencies = ((tmp=args.pop()) instanceof Array) ? tmp : (len===2 ? (tmp = [tmp]) : []);
 
-        $.dependencies.push(dependencies);
+        _.dependencies.push(dependencies);
         if (dependencies.length) {
-            $.require(dependencies, function() {
+            _.require(dependencies, function() {
                 if (typeof factory==='function') {
-                    $.exports.push(factory.apply(null, arguments));
+                    _.exports.push(factory.apply(null, arguments));
                 }
                 else {
-                    $.exports.push(factory);
+                    _.exports.push(factory);
                 }
             });
         }
         else {
             if (typeof factory==='function') {
-                $.exports.push(factory.apply(null));
+                _.exports.push(factory.apply(null));
             }
             else {
-                $.exports.push(factory);
+                _.exports.push(factory);
             }
         }
     };
 
-    $.define = define;
+    _.define = define;
 })(window);
 

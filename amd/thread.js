@@ -1,4 +1,4 @@
-(function($) {
+(function(_) {
     // setTimeout & setInterval
     var dOut = window.setTimeout,
         dInterval = window.setInterval;
@@ -70,5 +70,5 @@
         });
         worker.postMessage(depend);
     };
-    $.exec = exec;
+    _.exec = exec;
 })(window);

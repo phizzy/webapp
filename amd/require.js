@@ -1,9 +1,9 @@
-(function($) {
+(function(_) {
 
     "use strict";
 
-    $.exports = $.exports || [];
-    $.dependencies = $.dependencies || [];
+    _.exports = _.exports || [];
+    _.dependencies = _.dependencies || [];
 
     var step = {
         pending: {}
@@ -29,7 +29,7 @@
     };
 
     var requireString = function(string) {
-        var url = getURL(string);
+        var url = _.getURL(string);
         if (step.done[url]) {
             return step.done[url].exports;
         }
@@ -38,11 +38,11 @@
     var createScript = function(url) {
         var script = document.createElement('script');
         var afterLoaded= function() {
-            var dependencies = $.dependencies.pop();
+            var dependencies = _.dependencies.pop();
             var callMe = function() {
                 step.done[url] = {
                     timestamp: (new Date()).getTime()
-                    ,exports: $.exports.pop()
+                    ,exports: _.exports.pop()
                 };
                 callbacks.run(url);
             };
@@ -75,7 +75,7 @@
         dependencies = (dependencies instanceof Array) ? dependencies : [dependencies];
         var needWait = false;
         dependencies.forEach(function(depend) {
-            var url = window.getURL(depend);
+            var url = _.getURL(depend);
             if (!step.pending[url]) {
                 step.pending[url] = (new Date()).getTime();
                 needWait = true;
@@ -90,7 +90,7 @@
         if (!needWait) {
             var tmp = [];
             dependencies.forEach(function(depend) {
-                tmp.push(step.done[getURL(depend)].exports);
+                tmp.push(step.done[_.getURL(depend)].exports);
             });
             callback.apply(null, tmp);
         }
@@ -103,5 +103,5 @@
          */
         return (arguments.length===1 && typeof arguments[0]==='string') ? requireString.call(null, arguments[0]) : requireDependencies.apply(null, arguments);
     };
-    $.require = require;
+    _.require = require;
 })(window);

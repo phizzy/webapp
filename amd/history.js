@@ -1,5 +1,5 @@
-(function($) {
-    $.addEventListener('popstate', function(evt) {
+(function(_) {
+    _.addEventListener('popstate', function(evt) {
         var state = evt.state || {};
         // 初始访问页面
         if (!state.pathInfo) {
@@ -30,10 +30,10 @@
         }
         
         // 执行页面的渲染
-        $.lockey.reset();
+        _.lockey.reset();
         // workerData：webworker通过异步的方式处理数据
         // requireData：通过异步的方式获取模板
         // 最后，将数据和模板填充到页面，完成页面渲染
-        $.exec(state.pathInfo);
+        _.exec(state.pathInfo);
     });
 })(window);

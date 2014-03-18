@@ -1,5 +1,5 @@
-(function($) {
-    $.lockey = {
+(function(_) {
+    _.lockey = {
         id: ''
         ,reset: function() {
             this.id = Math.random() + ':' + (new Date()).getTime();
@@ -16,7 +16,7 @@
         ,lock: function(callback, changeKey) {
             if (typeof callback !== 'function') return callback;
             if (callback.lockey) return callback;
-            var that = $.lockey;
+            var that = _.lockey;
             var me = function() {
                 if (me.lockey!==that.get()) return;
                 return callback.apply(this, Array.prototype.slice.call(arguments));
@@ -25,5 +25,5 @@
             return me;
         }
     };
-    $.lock = $.lockey.lock;
+    _.lock = _.lockey.lock;
 })(window);
