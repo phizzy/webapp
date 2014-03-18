@@ -75,28 +75,31 @@ define(function() {
                 callback.eventSuffix = defaultSuffix;
             }
             this.addEventListener(eventName, callback, false);
-            if (!this.callbacks || !(this.callbacks instanceof Array)) {
-                this.callbacks = [];
-            }
-            this.callbacks.push(callback);
 
-            var finished = false;
-            var iEventName = eventName + '.' + callback.eventSuffix;
-            var that = this;
-            bindedElements.some(function(binded) {
-                if (binded.node.isSameNode(that)) {
-                    if (binded.events.indexOf(iEventName)===-1) {
-                        binded.events.push(iEventName);
-                    }
-                    finished = true;
-                    return true;
+            if (arguments.length==3) {
+                if (!this.callbacks || !(this.callbacks instanceof Array)) {
+                    this.callbacks = [];
                 }
-            });
-            if (!finished) {
-                bindedElements.push({
-                    node: this
-                    ,events: [iEventName]
+                this.callbacks.push(callback);
+
+                var finished = false;
+                var iEventName = eventName + '.' + callback.eventSuffix;
+                var that = this;
+                bindedElements.some(function(binded) {
+                    if (binded.node.isSameNode(that)) {
+                        if (binded.events.indexOf(iEventName)===-1) {
+                            binded.events.push(iEventName);
+                        }
+                        finished = true;
+                        return true;
+                    }
                 });
+                if (!finished) {
+                    bindedElements.push({
+                        node: this
+                        ,events: [iEventName]
+                    });
+                }
             }
             
             return this;
@@ -195,8 +198,9 @@ define(function() {
         return result;
     };
 
-    query.clearAllEvents = function(type) {
+    query.clearProxyEvents = function(type) {
         var type = type || defaultSuffix;
+        console.log(bindedElements);
         if (type===allSuffix) {
             bindedElements.forEach(function(binded) {
                 binded.events.forEach(function(eventName) {
