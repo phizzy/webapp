@@ -26,8 +26,8 @@
                 ,queryString: window.location.search
                 ,hash: isRouterableHash ? '' : window.location.hash
             };
+            window.history.replaceState(state, window.document.title, '/'+state.pathInfo+'/'+state.queryString+state.hash);
         }
-        window.history.replaceState(state, window.document.title, '/'+state.pathInfo+'/'+state.queryString+state.hash);
         
         // 执行页面的渲染
         $.lockey.reset();
