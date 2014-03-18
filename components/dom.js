@@ -44,7 +44,7 @@ define(function() {
         }
     };
 
-    var bindedElements = {};
+    var bindedElements = [];
 
     var defaultSuffix = 'page'
         ,allSuffix = 'all';
@@ -52,6 +52,18 @@ define(function() {
     var evtPtn = /([a-z]+)\.([a-z]+)/;
     var chandler = {
         on: function(eventName, callback) {
+            if (this instanceof NodeList) {
+                if (this.length>=1) {
+                    var args = [];
+                    Array.prototype.forEach.call(arguments, function(arg) {
+                        args.push(arg);
+                    });
+                    Array.prototype.forEach.call(this, function(node) {
+                        Element.prototype.on.apply(node, args);
+                    });
+                }
+                return this;
+            }
             if (arguments.length==3) {
                 callback = alias.on.apply(this, arguments);
             }
@@ -68,17 +80,40 @@ define(function() {
             }
             this.callbacks.push(callback);
 
-            bindedElements[this.queryString] = bindedElements[this.queryString] || [];
+            var finished = false;
             var iEventName = eventName + '.' + callback.eventSuffix;
-            if (bindedElements[this.queryString].indexOf(iEventName)===-1) {
-                bindedElements[this.queryString].push(iEventName);
+            var that = this;
+            bindedElements.some(function(binded) {
+                if (binded.node.isSameNode(that)) {
+                    if (binded.events.indexOf(iEventName)===-1) {
+                        binded.events.push(iEventName);
+                    }
+                    finished = true;
+                    return true;
+                }
+            });
+            if (!finished) {
+                bindedElements.push({
+                    node: this
+                    ,events: [iEventName]
+                });
             }
-
-            console.log(bindedElements);
-
+            
             return this;
         }
         ,off: function(eventName, callback) {
+            if (this instanceof NodeList) {
+                if (this.length>=1) {
+                    var args = [];
+                    Array.prototype.forEach.call(arguments, function(arg) {
+                        args.push(arg);
+                    });
+                    Array.prototype.forEach.call(this, function(node) {
+                        Element.prototype.off.apply(node, args);
+                    });
+                }
+                return this;
+            }
             var len = arguments.length;
             if (len==2) {
                 this.removeEventListener(eventName, callback, false);
@@ -102,9 +137,15 @@ define(function() {
                 for (var i=0,l=mj.length; i<l; i++) {
                     this.callbacks = this.callbacks.slice(i-tmpCount++);
                 }
-
+                
                 if (!this.callbacks.length) {
-                    delete bindedElements[this.queryString];
+                    var that = this;
+                    bindedElements.some(function(binded, index) {
+                        if (binded.node.isSameNode(that)) {
+                            bindedElements.slice(index);
+                            return true;
+                        }
+                    });
                 }
             }
             return this;
@@ -123,6 +164,10 @@ define(function() {
             }
             return this;
         }
+        ,appendChild: function() {
+            if (!(this instanceof NodeList)) return;
+            Element.prototype.appendChild.apply(this[0], arguments);
+        }
     };
 
     var OBJs = [Element, NodeList, HTMLDocument];
@@ -133,40 +178,44 @@ define(function() {
         }
     }
 
+    function createElement(string) {
+        var doc = document.createDocumentFragment();
+        doc.appendChild(document.createElement('body'));
+        query('body', doc).innerHTML = string;
+        return query('body', doc);
+    }
+
     function query(selector, parentElement) {
+        if (selector.indexOf('<')===0) return createElement(selector);
         if (!parentElement) parentElement=document;
         var result = parentElement.querySelectorAll(selector);
-        if (result.length===1) {
+        if (result.length==1) {
             result = result[0];
         }
-        result.queryString = selector;
         return result;
     };
 
-    query.clearAllEvents = function (type) {
+    query.clearAllEvents = function(type) {
         var type = type || defaultSuffix;
-        var ele;
         if (type===allSuffix) {
-            for (var i in bindedElements) {
-                ele = query(i);
-                bindedElements[i].forEach(function(evtName) {
-                    ele.off(evtName);
+            bindedElements.forEach(function(binded) {
+                binded.events.forEach(function(eventName) {
+                    binded.node.off(eventName);
                 });
-            }
+            });
         }
         else {
             type = '.' + type;
             var len = type.length;
-            for (var i in bindedElements) {
-                ele = query(i);
-                bindedElements[i].forEach(function(evtName) {
-                    if (evtName.lastIndexOf(type)===evtName.length-len) {
-                        ele.off(evtName);
+            bindedElements.forEach(function(binded) {
+                binded.events.forEach(function(eventName) {
+                    if (eventName.lastIndexOf(type)===eventName.length-len) {
+                        binded.node.off(eventName);
                     }
                 });
-            }
+            });
         }
-    }
+    };
 
     return query;
 });

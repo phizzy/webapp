@@ -21,10 +21,17 @@ define('../components/dom.js', function($) {
             alert(evt.target.tagName);
             $.clearAllEvents();
         };
-        $('#cc').on('click', callback);
+        var ccc = $('#cc');
+        ccc.on('click', callback);
         $('#cd').on('click', function() {
-            $('#cc').off('click');
+            ccc.off('click');
             alert('her');
         });
+
+        var nele = $('<h1>asdf</h1>');
+        nele.on('click', function() {
+            console.log('hhhhh');
+        });
+        $('body').appendChild(nele);
     };
 });
