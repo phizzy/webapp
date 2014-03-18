@@ -19,6 +19,7 @@
     // 执行webworker
     var workers = {};
     var ascId = 0;
+    var maxThread = document.querySelector('meta[name=phizzy-maxthread]') ? parseInt(document.querySelector('meta[name=phizzy-maxthread]').content, 10) : 2;
     var exec = function(depend) {
         var tmp, len=0;
         for (var i in workers) {

@@ -21,6 +21,7 @@ lockey.is	/home/pihizi/git/webapp/amd/lockey.js	/^        ,is: function(obj) {$/
 lockey.lock	/home/pihizi/git/webapp/amd/lockey.js	/^        ,lock: function(callback, changeKey) {$/;"	m
 lockey.lock.me	/home/pihizi/git/webapp/amd/lockey.js	/^            var me = function() {$/;"	f
 lockey.reset	/home/pihizi/git/webapp/amd/lockey.js	/^        ,reset: function() {$/;"	m
+maxThread	/home/pihizi/git/webapp/amd/thread.js	/^    var maxThread = document.querySelector('meta[name=phizzy-maxthread]') ? parseInt(document.querySelector('meta[name=phizzy-maxthread]').content, 10) : 2;$/;"	v
 myFC	/home/pihizi/git/webapp/amd/thread.js	/^        var myFC = window.lock(function() {$/;"	v
 myUC	/home/pihizi/git/webapp/amd/thread.js	/^        var myUC, myWC;$/;"	v
 require	/home/pihizi/git/webapp/amd/require.js	/^    var require = function() {$/;"	f

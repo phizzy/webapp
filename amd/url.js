@@ -24,7 +24,7 @@
         if (action && action.test(name)) {
             myAction = RegExp.$1;
         }
-        var url = jsRoot + myAction + (suffix[protocol] ? '.'+suffix[protocol] : '') + '.js';
+        var url = jsRoot + myAction + ((suffix && suffix[protocol]) ? '.'+suffix[protocol] : '') + '.js';
         return url;
     };
 
