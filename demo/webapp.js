@@ -5,8 +5,7 @@ if (self.document) {
 else {
 }
 */
-define('../plugins/dom.js', function($) {
-    return function(data) {
+define('../plugins/dom.witheventmanage.js', function($) {
         var ele = document.createElement('p');
         ele.id = 'cc';
         ele.innerHTML = 'HTML';
@@ -17,14 +16,12 @@ define('../plugins/dom.js', function($) {
         ele.innerHTML = 'HTMLS';
         ele.className = 'adsf';
         $('body').appendChild(ele);
-
+    return function(data) {
+        $.clearEvents();
         var callback = function(evt) {
             alert(evt.target.tagName);
         };
 
         $('#cc').on('click', callback);
-        setTimeout(function() {
-            $('#cc').off('click', callback);
-        }, 10000);
     };
 });

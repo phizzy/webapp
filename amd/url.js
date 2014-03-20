@@ -1,7 +1,7 @@
 (function(_) {
-    var action = document.querySelector('meta[name=phizzy-action]')
-        ,suffix = document.querySelector('meta[name=phizzy-suffix]')
-        ,jsRoot = document.querySelector('meta[name=phizzy-root-js]')
+    var action = document.querySelector('meta[name=phizzy-url-action]')
+        ,suffix = document.querySelector('meta[name=phizzy-url-suffix]')
+        ,jsRoot = document.querySelector('meta[name=phizzy-url-rootjs]')
         ;
 
     action = action ? new RegExp(action.content) : '';

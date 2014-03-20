@@ -46,7 +46,9 @@ define(function() {
 
     var bindedElements = [];
 
-    var proxySuffix = 'proxy';
+    var proxySuffix = 'proxy'
+        ,pageSuffix = 'page'
+        ;
     
     var evtPtn = /([a-z]+)\.([a-z]+)/;
     var chandler = {
@@ -78,38 +80,41 @@ define(function() {
                 eventName = RegExp.$1;
                 info.suffix = RegExp.$2;
             }
-            else if (isProxy) {
-                info.suffix = proxySuffix;
+            else {
+                if (isProxy) {
+                    info.suffix = proxySuffix;
+                }
+                else {
+                    info.suffix = pageSuffix;
+                }
             }
             info.name = eventName;
             if (filter) info.filter = filter;
             callback.info = info;
             this.addEventListener(eventName, callback, false);
 
-            if (isProxy) {
-                if (!this.callbacks || !(this.callbacks instanceof Array)) {
-                    this.callbacks = [];
-                }
-                this.callbacks.push(callback);
+            if (!this.callbacks || !(this.callbacks instanceof Array)) {
+                this.callbacks = [];
+            }
+            this.callbacks.push(callback);
 
-                var finished = false;
-                var iEventName = callback.info.suffix ? eventName + '.' + callback.info.suffix: eventName;
-                var that = this;
-                bindedElements.some(function(binded) {
-                    if (binded.node.isSameNode(that)) {
-                        if (binded.events.indexOf(iEventName)===-1) {
-                            binded.events.push(iEventName);
-                        }
-                        finished = true;
-                        return true;
+            var finished = false;
+            var iEventName = eventName + '.' + callback.info.suffix;
+            var that = this;
+            bindedElements.some(function(binded) {
+                if (binded.node.isSameNode(that)) {
+                    if (binded.events.indexOf(iEventName)===-1) {
+                        binded.events.push(iEventName);
                     }
-                });
-                if (!finished) {
-                    bindedElements.push({
-                        node: this
-                        ,events: [iEventName]
-                    });
+                    finished = true;
+                    return true;
                 }
+            });
+            if (!finished) {
+                bindedElements.push({
+                    node: this
+                    ,events: [iEventName]
+                });
             }
             
             return this;
@@ -217,9 +222,8 @@ define(function() {
     };
 
     // 事件垃圾回收
+    // 当某个dom被删除后，如果已经绑定了事件，则导致内存泄漏，需要手动清除
     query.gcEvents = function() {
-        bindedElements.forEach(function(binded) {
-        });
     };
     // 清除所有事件
     query.clearAllEvents = function() {
@@ -232,14 +236,19 @@ define(function() {
 
     // 清除指定类型的事件
     query.clearEvents = function(type) {
-        var type = type || proxySuffix;
-        type = '.' + type;
-        var len = type.length;
-        bindedElements.forEach(function(binded) {
-            binded.events.forEach(function(eventName) {
-                if (eventName.lastIndexOf(type)===eventName.length-len) {
-                    binded.node.off(eventName);
-                }
+        var type = type || [pageSuffix, proxySuffix];
+        if (!(type instanceof Array)) {
+            type = [type];
+        }
+        type.forEach(function(iType) {
+            iType = '.' + iType;
+            var len = iType.length;
+            bindedElements.forEach(function(binded) {
+                binded.events.forEach(function(eventName) {
+                    if (eventName.lastIndexOf(iType)===eventName.length-len) {
+                        binded.node.off(eventName);
+                    }
+                });
             });
         });
     };

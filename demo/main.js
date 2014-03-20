@@ -5,8 +5,7 @@ if (self.document) {
 else {
 }
 */
-define('../components/dom.js', function($) {
+define('../plugins/dom.witheventmanage.js', function($) {
     return function(data) {
-
     };
 });
