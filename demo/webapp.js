@@ -5,7 +5,7 @@ if (self.document) {
 else {
 }
 */
-define('../components/dom.js', function($) {
+define('../plugins/dom.js', function($) {
     return function(data) {
         var ele = document.createElement('p');
         ele.id = 'cc';
