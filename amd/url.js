@@ -31,7 +31,14 @@
             myAction = RegExp._1;
         }
         var url = jsRoot + myAction + ((suffix && suffix[protocol]) ? '.'+suffix[protocol] : '') + '.js';
-        url = url.replace(/(?:[a-z0-9_]+\/\.\.\/)|(?:\.\/)/, '');
+        while (true) {
+            if (/(?:[a-z0-9_]+\/\.\.\/)|(?:\.\/)/.test(url)) {
+                url = url.replace(/(?:[a-z0-9_]+\/\.\.\/)|(?:\.\/)/, '');
+            }
+            else {
+                break;
+            }
+        };
         return url;
     };
 
