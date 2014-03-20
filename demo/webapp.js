@@ -20,8 +20,11 @@ define('../components/dom.js', function($) {
 
         var callback = function(evt) {
             alert(evt.target.tagName);
-            $.clearProxyEvents();
         };
-        $('body').on('click', 'p', callback);
+
+        $('#cc').on('click', callback);
+        setTimeout(function() {
+            $('#cc').off('click', callback);
+        }, 10000);
     };
 });

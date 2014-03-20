@@ -44,6 +44,11 @@ define(function() {
         }
     };
 
+    var bindedElements = [];
+
+    var proxySuffix = 'proxy';
+    
+    var evtPtn = /([a-z]+)\.([a-z]+)/;
     var chandler = {
         on: function() {
             var eventName, callback, filter;
@@ -68,8 +73,45 @@ define(function() {
             else {
                 callback = arguments[1];
             }
+            var info = {};
+            if (evtPtn.test(eventName)) {
+                eventName = RegExp.$1;
+                info.suffix = RegExp.$2;
+            }
+            else if (isProxy) {
+                info.suffix = proxySuffix;
+            }
+            info.name = eventName;
+            if (filter) info.filter = filter;
+            callback.info = info;
             this.addEventListener(eventName, callback, false);
 
+            if (isProxy) {
+                if (!this.callbacks || !(this.callbacks instanceof Array)) {
+                    this.callbacks = [];
+                }
+                this.callbacks.push(callback);
+
+                var finished = false;
+                var iEventName = callback.info.suffix ? eventName + '.' + callback.info.suffix: eventName;
+                var that = this;
+                bindedElements.some(function(binded) {
+                    if (binded.node.isSameNode(that)) {
+                        if (binded.events.indexOf(iEventName)===-1) {
+                            binded.events.push(iEventName);
+                        }
+                        finished = true;
+                        return true;
+                    }
+                });
+                if (!finished) {
+                    bindedElements.push({
+                        node: this
+                        ,events: [iEventName]
+                    });
+                }
+            }
+            
             return this;
         }
         ,off: function() {
@@ -88,10 +130,45 @@ define(function() {
             var eventName = arguments[0], filter, callback;
             var len = arguments.length;
 
-            if (len===2 && typeof arguments[1]==='function') {
-                this.removeEventListener(eventName, arguments[1], false);
+            if (len===2) {
+                if (typeof arguments[1]==='function') {
+                    this.removeEventListener(eventName, arguments[1], false);
+                    return this;
+                }
+                else {
+                    filter = arguments[1];
+                }
             }
 
+            if (this.callbacks && this.callbacks instanceof Array && this.callbacks.length) {
+                var suffix, mj=[];
+                if (evtPtn.test(eventName)) {
+                    eventName = RegExp.$1;
+                    suffix = RegExp.$2;
+                }
+                var tmpCallback;
+                for (var i=0,l=this.callbacks.length; i<l; i++) {
+                    tmpCallback = this.callbacks[i];
+                    if (tmpCallback.info.name===eventName && (!suffix || tmpCallback.info.suffix===suffix) && (!filter || tmpCallback.info.filter===filter)) {
+                        this.off(eventName, tmpCallback);
+                        mj.push(i);
+                    }
+                }
+                var tmpCount = 0;
+                for (var i=0,l=mj.length; i<l; i++) {
+                    this.callbacks = this.callbacks.slice(i-tmpCount++);
+                }
+                
+                if (!this.callbacks.length) {
+                    var that = this;
+                    bindedElements.some(function(binded, index) {
+                        if (binded.node.isSameNode(that)) {
+                            bindedElements.slice(index);
+                            return true;
+                        }
+                    });
+                }
+            }
             return this;
         }
         ,addEventListener: function() {
@@ -137,6 +214,34 @@ define(function() {
             result = result[0];
         }
         return result;
+    };
+
+    // 事件垃圾回收
+    query.gcEvents = function() {
+        bindedElements.forEach(function(binded) {
+        });
+    };
+    // 清除所有事件
+    query.clearAllEvents = function() {
+        bindedElements.forEach(function(binded) {
+            binded.events.forEach(function(eventName) {
+                binded.node.off(eventName);
+            });
+        });
+    };
+
+    // 清除指定类型的事件
+    query.clearEvents = function(type) {
+        var type = type || proxySuffix;
+        type = '.' + type;
+        var len = type.length;
+        bindedElements.forEach(function(binded) {
+            binded.events.forEach(function(eventName) {
+                if (eventName.lastIndexOf(type)===eventName.length-len) {
+                    binded.node.off(eventName);
+                }
+            });
+        });
     };
 
     return query;
