@@ -126,7 +126,7 @@ define(function() {
         var doc = document.createDocumentFragment();
         doc.appendChild(document.createElement('body'));
         query('body', doc).innerHTML = string;
-        return query('body', doc);
+        return query('body > *', doc);
     }
 
     function query(selector, parentElement) {
